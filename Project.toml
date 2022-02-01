@@ -13,6 +13,7 @@ ResizableArrays = "df514bf8-98b6-11e9-19f1-af1e340ea726"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
+ResizableArrays = "0.3"
 julia = "1"
 
 [extras]
