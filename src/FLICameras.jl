@@ -1,11 +1,10 @@
 module FLICameras
 using Printf
-# using Images
+using Images
 using Dates
 using Base: @propagate_inbounds
 using Base.Threads
 using Distributed
-using Printf
 import Base:
     VersionNumber,
     axes,

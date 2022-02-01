@@ -129,5 +129,5 @@ const ELTYPE_DOUBLE = 10 # Double precision floating-point
 const _typeof_timespec_sec = Int64
 const _typeof_timespec_nsec = Int64
 
-const FLIDOMAIN_USB = 0x02
+const FLIDOMAIN_USB = 0x002
 const FLIDEVICE_CAMERA = 0x100

@@ -19,5 +19,4 @@ const _error_symbols = Dict{Cint,Symbol}()
     throw(CallError(err, func))
 
 show(io::IO, ::MIME"text/plain", err::CallError) =
-    print(io, " Error code ", err.code,
-          " returned by function `", err.func, "`")
+    print(io, " Fail to execute", err.func)

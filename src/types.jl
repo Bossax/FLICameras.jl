@@ -9,7 +9,7 @@
 const Cenum = Cint
 
 struct CallError <: Exception
-    code::Cint      # return value
+    code::Cint      # return value 0 success, non-zero on failure
     func::Symbol    # function causing error
 end
 
@@ -24,6 +24,29 @@ struct Continue<:CameraStatus end
 const flidev = Clong
 const CameraHandle = Ptr{flidev}
 
+
+"""
+
+`TaoBindings.AbstractHighResolutionTime` is the parent type of time types with
+a resolution of one nanosecond, that is [`TaoBindings.TimeSpec`](@ref) and
+[`TaoBindings.HighResolutionTime`](@ref).
+
+"""
+abstract type AbstractHighResolutionTime end
+
+"""
+The structure `TaoBindings.HighResolutionTime` is the Julia equivalent to the
+TAO `tao_time_t` structure.  Its members are `sec`, an integer number of
+seconds, and `nsec`, an integer number of nanoseconds.
+
+Also see [`TaoBindings.TimeSpec`](@ref).
+
+"""
+struct HighResolutionTime <: AbstractHighResolutionTime
+    sec::Int64
+    nsec::Int64
+end
+
 """
     imgConfigContext
     stores configuration parameters for the hardware to be set prior to the
@@ -36,8 +59,9 @@ mutable struct ImageConfigContext
     height::Clong
     offsetX::Clong
     offsetY::Clong
-    bytePerPixel::Int
     exposuretime::Cdouble   # msec
+
+    bytePerPixel::Int
 
     # TODO: add binning??
 
@@ -54,13 +78,13 @@ mutable struct CameraList
     domainList::Vector{Clong}
     numCam::Int64
 
-    function CameraList(interface::UInt8, deviceType::UInt8)
+    function CameraList(interface::UInt16, deviceType::UInt16)
 
-        inputDomain = convert(Clong,domain | deviceT)
+        inputDomain = convert(Clong, interface | deviceType)
         maxStrLength::UInt32 = 100
-        filename = Ref{String}(0)
-        name =  Ref{String}(0)
-        domain = Ref{Clong}(0)
+        filename = Ref{String}()
+        name =  Ref{String}()
+        domain = Ref{Clong}()
 
         numCam = 0
         camList = Vector{String}(undef,2)
@@ -88,7 +112,8 @@ mutable struct CameraList
 
         end
 
-
+        @checked_call(:FLIDeleteList,(nothing,), nothing)
+        
         # Return the instanciated object.
         return new(camList, domainList, numCam)
     end
@@ -110,7 +135,7 @@ mutable struct Camera
 
         @checked_call(:FLIOpen, (CameraHandle, String, Clong,),
                       ref, devName, domainName)
-        return new(ref[], domainName)
+        return finalizer(_finalize,new(ref[], domainName))
 
     end
 end
