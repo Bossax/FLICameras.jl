@@ -293,13 +293,11 @@ function _listening(shcam::SharedCamera, remcam::RemoteCamera)
     # check the command
       @info "wait cmds"
       @async _keep_checking_cmds(cmds, remcam.no_cmds)
-      # wait for the cmds to be filled
-      while isempty(cmds) end
-
+      wait(remcam.no_cmds)
       #  read new cmd
       cmd = rdlock(cmds,0.5) do
           pop!(cmds)
-      end
+    end
 
     # sent the command to the camera
     if next_camera_operation(RemoteCameraCommand(cmd),shcam, remcam)
@@ -309,6 +307,24 @@ function _listening(shcam::SharedCamera, remcam::RemoteCamera)
     end
 
   end
+end
+"""
+    This function keeps checking the cmd array if there is a new command written to
+    the shared array
+"""
+function _keep_checking_cmds(cmd_array::SharedArray{Cint,1}, no_cmds::Condition)
+      cmd0 = rdlock(cmd_array,0.5) do
+          cmd_array[1]
+      end
+      cmd_now = copy(cmd0)
+
+    while cmd_now == cmd0
+      cmd_now = rdlock(cmd_array,0.5) do
+          cmd_array[1]
+      end
+    end
+    notify(no_cmds)
+    nothing
 end
 
 ## attach extension
