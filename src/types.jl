@@ -82,41 +82,65 @@ mutable struct CameraList
 
         inputDomain = convert(Clong, interface | deviceType)
         maxStrLength::UInt32 = 100
-        filename = Ref{String}()
-        name =  Ref{String}()
+
+
+        filename = Vector{UInt8}(undef, 100)
+        fill!(filename, 0x00)
+        filename_ptr = pointer(filename)
+
+        name  = Vector{UInt8}(undef, 100)
+        fill!(name, 0x00)
+        name_ptr =  pointer(name)
+
         domain = Ref{Clong}()
 
         numCam = 0
         camList = Vector{String}(undef,2)
-        domainList = Vector{String}(undef,2)
+        domainList = Vector{Clong}(undef,2)
 
         @checked_call(:FLICreateList,(Clong,), inputDomain)
 
+
+        @checked_call(:FLIListFirst,(Ptr{Clong}, Ptr{UInt8},UInt32,
+                    Ptr{UInt8} ,UInt32,), domain,filename_ptr, maxStrLength,
+                    name_ptr, maxStrLength)
+
+        numCam = numCam +1
+        jfilename = strip(String(filename), Char(0x00))
+        println(jfilename)
+        camList[numCam] = jfilename
+        domainList[numCam] = domain[]
+
+
+
+        err = 0
         # Retrieve the camera list
         while true
+
+
             err = ccall((:FLIListNext, lib), Cint,
-                        (Ptr{Clong}, Ptr{String},UInt32,Ptr{String},UInt32,),
-                         domain,filename, maxStrLength,name, maxStrLength)
+                        (Ptr{Clong}, Ptr{UInt8}, UInt32, Ptr{UInt8}, UInt32,),
+                         domain,filename_ptr, maxStrLength,name_ptr, maxStrLength)
 
             if err != 0
                 break
             end
 
-            @checked_call(:FLIListFirst,(Ptr{Clong}, Ptr{String},UInt32,
-                        Ptr{String},UInt32,), domain,filename, maxStrLength,
-                        name, maxStrLength)
-
             numCam = numCam +1
-            camList[numCam] = filename[]
+            jfilename = strip(String(filename), Char(0x00))
+            println(jfilename)
+
+            camList[numCam] = jfilename
             domainList[numCam] = domain[]
 
         end
 
-        @checked_call(:FLIDeleteList,(nothing,), nothing)
-        
+        @checked_call(:FLIDeleteList,(Ptr{Cvoid},), Ref{Cvoid}())
+
         # Return the instanciated object.
         return new(camList, domainList, numCam)
     end
+    nothing
 
 end
 
@@ -133,7 +157,7 @@ mutable struct Camera
         domainName = devList.domainList[i]
         ref = Ref{CameraHandle}(0)
 
-        @checked_call(:FLIOpen, (CameraHandle, String, Clong,),
+        @checked_call(:FLIOpen, (Ptr{CameraHandle}, Cstring, Int64,),
                       ref, devName, domainName)
         return finalizer(_finalize,new(ref[], domainName))
 

@@ -2,7 +2,7 @@ module BuildingTaoBindings
 
 using Libdl
 
-TAO_INCDIR = get(ENV, "TAO_INCDIR", "/usr/local/include")
+TAO_INCDIR = get(ENV, "TAO_INCDIR", "/opt/TAO/base")
 TAO_LIBDIR = get(ENV, "TAO_LIBDIR", "/usr/local/lib")
 TAO_DLL = joinpath(TAO_LIBDIR, "libtao.$(Libdl.dlext)")
 

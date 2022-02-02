@@ -1,0 +1,17 @@
+make: *** No rule to make target '/usr/local/include/tao.h', needed by 'gendeps'.  Stop.
+ERROR: LoadError: failed process: Process(`make TAO_INCDIR=/usr/local/include TAO_LIBDIR=/usr/local/lib TAO_DLL=/usr/local/lib/libtao.so all`, ProcessExited(2)) [2]
+
+Stacktrace:
+ [1] pipeline_error
+   @ ./process.jl:525 [inlined]
+ [2] run(::Cmd; wait::Bool)
+   @ Base ./process.jl:440
+ [3] run(::Cmd)
+   @ Base ./process.jl:438
+ [4] top-level scope
+   @ ~/.julia/dev/FLICameras/deps/build.jl:9
+ [5] include(fname::String)
+   @ Base.MainInclude ./client.jl:444
+ [6] top-level scope
+   @ none:5
+in expression starting at /home/narit/.julia/dev/FLICameras/deps/build.jl:1

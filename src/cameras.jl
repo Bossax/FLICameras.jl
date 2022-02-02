@@ -53,7 +53,7 @@ end
     Set temperature
 """ set_temperature
 set_temperature(camera::Camera, temperature::Float64) = begin
-    @checked_call(:FLISetTemeprature,(CameraHandle, Float64), handle(camera), temperature)
+    @checked_call(:FLISetTemperature,(CameraHandle, Float64), handle(camera), temperature)
 end
 #===
     Getter functions

@@ -15,9 +15,9 @@
 #
 
 # Path to the core TAO dynamic library:
-const taolib = "/home/evwaco/TAO/base/.libs/libtao.so"
+const taolib = "/osr/local/lib/libtao.so"
 
-const lib = "/opt/fli/lib/lib/libfli.so"
+const lib = "/opt/fli/libfli-1.104/lib/libfli.so"
 # Possible return values for an operation:
 struct Status
     val::Cint

@@ -1,6 +1,6 @@
 #   Basic example to play around image configuration
 # take the number of images as specified and save to bmp/png format
-
+using Revise
 using FLICameras
 
 interface = FLICameras.FLIDOMAIN_USB
