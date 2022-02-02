@@ -292,11 +292,14 @@ function _listening(shcam::SharedCamera, remcam::RemoteCamera)
     while true
     # check the command
       @info "wait cmds"
-      wait(remcam.no_cmds)
+      @async _keep_checking_cmds(cmds, remcam.no_cmds)
+      # wait for the cmds to be filled
+      while isempty(cmds) end
+
       #  read new cmd
       cmd = rdlock(cmds,0.5) do
           pop!(cmds)
-    end
+      end
 
     # sent the command to the camera
     if next_camera_operation(RemoteCameraCommand(cmd),shcam, remcam)
@@ -307,7 +310,6 @@ function _listening(shcam::SharedCamera, remcam::RemoteCamera)
 
   end
 end
-
 
 ## attach extension
 function attach(::Type{SharedCamera}, shmid::Integer)
