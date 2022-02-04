@@ -8,6 +8,9 @@
 # Julia type for a C enumeration.
 const Cenum = Cint
 
+const FLIDOMAIN_USB = 0x002
+const FLIDEVICE_CAMERA = 0x100
+
 struct CallError <: Exception
     code::Cint      # return value 0 success, non-zero on failure
     func::Symbol    # function causing error

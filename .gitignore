@@ -3,3 +3,6 @@
 *.bmp
 *.jpeg
 
+deps.jl
+build.log
+gendeps

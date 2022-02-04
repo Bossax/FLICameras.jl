@@ -287,44 +287,46 @@ listening(shcam::SharedCamera, remcam::RemoteCamera) = @async _listening(shcam, 
 
 function _listening(shcam::SharedCamera, remcam::RemoteCamera)
 
-    cmds = remcam.cmds
+  while true
+   # check the command
+   @info "wait cmds"
 
-    while true
-    # check the command
-      @info "wait cmds"
-      @async _keep_checking_cmds(cmds, remcam.no_cmds)
-      wait(remcam.no_cmds)
-      #  read new cmd
-      cmd = rdlock(cmds,0.5) do
-          pop!(cmds)
-    end
+   @async _keep_checking_cmds(remcam.cmds, remcam.no_cmds )
+   wait(remcam.no_cmds)
+   #  read new cmd
+   cmd = rdlock(remcam.cmds,0.5) do
+       pop!(remcam.cmds)
+   end
+   # sent the command to the camera
+   if next_camera_operation(RemoteCameraCommand(cmd),shcam, remcam)
+     @info "Command successful..."
+   else
+     @info "Command failed..."
+   end
 
-    # sent the command to the camera
-    if next_camera_operation(RemoteCameraCommand(cmd),shcam, remcam)
-      @info "Command successful..."
-    else
-      @info "Command failed..."
-    end
-
-  end
+ end
 end
+
 """
-    This function keeps checking the cmd array if there is a new command written to
-    the shared array
+   This function keeps checking the cmd array if there is a new command written to
+   the shared array
 """
 function _keep_checking_cmds(cmd_array::SharedArray{Cint,1}, no_cmds::Condition)
-      cmd0 = rdlock(cmd_array,0.5) do
-          cmd_array[1]
-      end
-      cmd_now = copy(cmd0)
 
-    while cmd_now == cmd0
-      cmd_now = rdlock(cmd_array,0.5) do
-          cmd_array[1]
-      end
-    end
-    notify(no_cmds)
-    nothing
+     cmd0 = rdlock(cmd_array,0.5) do
+         cmd_array[1]
+     end
+     cmd_now = copy(cmd0)
+
+   while cmd_now == cmd0
+     cmd_now = rdlock(cmd_array,0.5) do
+         cmd_array[1]
+     end
+     sleep(0.01)
+
+   end
+   notify(no_cmds)
+   nothing
 end
 
 ## attach extension
